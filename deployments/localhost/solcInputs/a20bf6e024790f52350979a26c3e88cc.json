@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Perpustakaan.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity 0.8.13;\n\ncontract Perpustakaaan {\n\n    struct Book {\n        string title;\n        uint256 year;\n        string writer;\n    }\n\n    mapping(string => Book) private bookList;\n\n    event bookAdded(string ISBN, string title, uint256 year, string writer);\n    event bookEdited(string ISBN, string titleFrom, string titleTo, uint256 yearFrom, uint256 yearTo, string writerFrom, string writerTo);\n    event bookDeleted(string ISBN);\n\n    address owner;\n\n    modifier onlyOwner {\n        require(msg.sender == owner, \"You're not admin\");\n        _;\n    }\n\n    modifier isBookNotExist(string calldata _ISBN) {\n        require(bookList[_ISBN].year != 0, \"Book isn't exist\");\n        _;\n    }\n\n    constructor() {\n        owner = msg.sender;\n    }\n\n    // Fungsi untuk identitas buku\n    function bookIdentity(string calldata _ISBN, string calldata _title, uint256 _year, string calldata _writer) private {\n        bookList[_ISBN] = Book({\n            title: _title,\n            year: _year,\n            writer: _writer\n        });\n    }\n\n    // Menambahkan buku\n    function addBook(string calldata _ISBN, string calldata _title, uint256 _year, string calldata _writer) public onlyOwner {\n\n        require(bookList[_ISBN].year == 0, \"Book already exist\");\n\n        bookIdentity(_ISBN, _title, _year, _writer);\n\n        emit bookAdded(_ISBN, _title, _year, _writer);\n\n    }\n\n    // Mengubah buku\n    function editBook(string calldata _ISBN, string calldata _title, uint256 _year, string calldata _writer) public isBookNotExist(_ISBN) onlyOwner{\n        Book memory _theBook = bookList[_ISBN];\n        \n        emit bookEdited(_ISBN, _theBook.title, _title, _theBook.year, _year, _theBook.writer, _writer);\n\n        bookIdentity(_ISBN, _title, _year, _writer);\n\n    }\n\n    // Menghapus buku\n    function removeBook(string calldata _ISBN) public onlyOwner isBookNotExist(_ISBN){\n        delete bookList[_ISBN];\n        emit bookDeleted(_ISBN);\n\n    }\n\n    // Get Data Buku\n    function getBookData(string calldata _ISBN) public view isBookNotExist(_ISBN) returns(string memory, uint256, string memory){\n        Book memory _theBook = bookList[_ISBN];\n        return (_theBook.title, _theBook.year, _theBook.writer);\n    }\n\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
